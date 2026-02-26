@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Ludo King — Online Multiplayer</title>
+    <meta name="description"
+        content="Play Ludo King online with friends. Create a room, invite friends, and chat in real-time." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="online.css" />
+</head>
+
+<body>
+
+    <!-- ══ AUTH SCREEN ══════════════════════════════════════════ -->
+    <div id="auth-screen" class="hidden">
+        <div class="auth-wrap">
+            <h1 class="game-title">🎲 LUDO KING</h1>
+            <p class="subtitle">Online Multiplayer</p>
+            <div class="auth-card">
+                <input id="auth-username" class="auth-input" type="text" placeholder="Username" maxlength="20"
+                    autocomplete="username" />
+                <input id="auth-password" class="auth-input" type="password" placeholder="Password" maxlength="40"
+                    autocomplete="current-password" />
+                <p id="auth-error" class="form-error"></p>
+                <div class="auth-btns">
+                    <button id="auth-login-btn" class="btn-primary">Login</button>
+                    <button id="auth-register-btn" class="btn-secondary">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ LOBBY SCREEN ═════════════════════════════════════════ -->
+    <div id="lobby-screen" class="hidden">
+        <div class="lobby-wrap">
+            <div class="lobby-header">
+                <span class="game-logo">🎲 LUDO KING</span>
+                <div class="user-badge">
+                    <span id="lobby-username"></span>
+                    <button id="lobby-logout-btn" class="btn-ghost">Logout</button>
+                </div>
+            </div>
+            <div class="lobby-cards">
+                <div class="lobby-card">
+                    <div class="lobby-card-icon">🏠</div>
+                    <h2>Create Room</h2>
+                    <p class="lobby-desc">Start a new game and share the code with friends</p>
+                    <button id="create-room-btn" class="btn-primary wide">Create Room</button>
+                </div>
+                <div class="lobby-card">
+                    <div class="lobby-card-icon">🔗</div>
+                    <h2>Join Room</h2>
+                    <p class="lobby-desc">Enter a 6-character room code to join friends</p>
+                    <input id="join-code" class="auth-input code-input" type="text" placeholder="XXXXXX"
+                        maxlength="6" />
+                    <button id="join-room-btn" class="btn-secondary wide">Join Room</button>
+                </div>
+            </div>
+            <p id="lobby-error" class="form-error" style="text-align:center;margin-top:12px;"></p>
+        </div>
+    </div>
+
+    <!-- ══ WAITING ROOM SCREEN ══════════════════════════════════ -->
+    <div id="room-screen" class="hidden">
+        <div class="room-wrap">
+            <div class="room-header">
+                <div class="game-logo">🎲 LUDO KING</div>
+                <div class="room-code-block">
+                    <span class="room-code-label">Room Code:</span>
+                    <span id="room-code-display" class="room-code-value">——</span>
+                    <button id="copy-code-btn" class="btn-ghost">📋 Copy</button>
+                </div>
+            </div>
+            <div class="room-body">
+                <div class="room-players-panel">
+                    <h3 class="panel-title">Players</h3>
+                    <div id="room-players-list" class="room-players-list"></div>
+                    <div class="room-actions">
+                        <button id="start-game-btn" class="btn-primary hidden">🎲 Start Game</button>
+                        <button id="leave-room-btn" class="btn-ghost">Leave Room</button>
+                    </div>
+                    <p class="room-hint">Share the room code with friends to play together!</p>
+                </div>
+                <div class="room-chat">
+                    <h3 class="panel-title">Chat</h3>
+                    <div id="room-chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-row">
+                        <input id="room-chat-input" class="chat-input" type="text" placeholder="Type a message…"
+                            maxlength="200" />
+                        <button id="room-chat-send" class="btn-primary chat-send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ GAME CONTAINER ════════════════════════════════════════ -->
+    <div id="game-container" class="hidden">
+        <div class="game-header">
+            <div class="game-logo">🎲 LUDO</div>
+            <div id="turn-indicator" class="turn-indicator">Loading…</div>
+            <button id="chat-toggle-btn" class="btn-ghost" style="font-size:1.1rem;" title="Toggle Chat">💬</button>
+        </div>
+        <div class="board-area">
+            <div class="side-panels">
+                <div class="player-panel panel-red hidden" id="panel-red">
+                    <div class="panel-header">
+                        <div class="panel-dot"></div><span class="panel-name">Red</span><span class="panel-type"
+                            id="type-red">Online</span>
+                    </div>
+                    <div class="finished-count">🏁 0/4</div>
+                </div>
+                <div class="player-panel panel-blue hidden" id="panel-blue">
+                    <div class="panel-header">
+                        <div class="panel-dot"></div><span class="panel-name">Blue</span><span class="panel-type"
+                            id="type-blue">Online</span>
+                    </div>
+                    <div class="finished-count">🏁 0/4</div>
+                </div>
+            </div>
+            <div class="board-wrap">
+                <canvas id="ludo-canvas"></canvas>
+                <div id="token-layer"></div>
+            </div>
+            <div class="side-panels">
+                <div class="player-panel panel-green hidden" id="panel-green">
+                    <div class="panel-header">
+                        <div class="panel-dot"></div><span class="panel-name">Green</span><span class="panel-type"
+                            id="type-green">Online</span>
+                    </div>
+                    <div class="finished-count">🏁 0/4</div>
+                </div>
+                <div class="player-panel panel-yellow hidden" id="panel-yellow">
+                    <div class="panel-header">
+                        <div class="panel-dot"></div><span class="panel-name">Yellow</span><span class="panel-type"
+                            id="type-yellow">Online</span>
+                    </div>
+                    <div class="finished-count">🏁 0/4</div>
+                </div>
+                <div class="dice-area">
+                    <div class="dice-label">Dice</div>
+                    <div id="dice-face"></div>
+                    <button id="roll-btn">🎲 Roll</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ CHAT SIDE PANEL ═══════════════════════════════════════ -->
+    <div id="chat-panel" class="chat-panel hidden">
+        <div class="chat-panel-header">
+            <span>💬 Chat</span>
+            <button onclick="document.getElementById('chat-panel').classList.toggle('chat-open')"
+                class="btn-ghost">✕</button>
+        </div>
+        <div id="in-game-chat-messages" class="chat-messages"></div>
+        <div class="chat-input-row">
+            <input id="in-game-chat-input" class="chat-input" type="text" placeholder="Message…" maxlength="200" />
+            <button id="in-game-chat-send" class="btn-primary chat-send-btn">➤</button>
+        </div>
+    </div>
+
+    <!-- ══ WIN SCREEN ═══════════════════════════════════════════ -->
+    <canvas id="confetti-canvas"></canvas>
+    <div id="win-screen" class="hidden">
+        <div class="win-card">
+            <div style="font-size:3.8rem;margin-bottom:10px">🏆</div>
+            <span id="win-banner" class="win-banner">—</span>
+            <p class="win-subtitle">Congratulations!</p>
+            <button id="play-again-btn" onclick="location.reload()">🔄 Back to Lobby</button>
+        </div>
+    </div>
+
+    <!-- ══ SCRIPTS ══════════════════════════════════════════════ -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/gameEngine.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/socket.js"></script>
+    <script src="js/onlineUI.js"></script>
+    <script>
+        function startConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const ctx = canvas.getContext('2d');
+            const ptcls = Array.from({ length: 130 }, () => ({
+                x: Math.random() * canvas.width, y: Math.random() * -canvas.height,
+                w: Math.random() * 10 + 4, h: Math.random() * 6 + 3,
+                clr: ['#e74c3c', '#27ae60', '#f1c40f', '#2980b9', '#9b59b6', '#e67e22'][Math.floor(Math.random() * 6)],
+                speed: Math.random() * 3 + 1, angle: Math.random() * 360, spin: (Math.random() - .5) * 5,
+            }));
+            let running = true;
+            const loop = () => {
+                if (!running) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ptcls.forEach(p => {
+                    p.y += p.speed; p.angle += p.spin;
+                    if (p.y > canvas.height) { p.y = -20; p.x = Math.random() * canvas.width; }
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle * Math.PI / 180);
+                    ctx.fillStyle = p.clr; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+                });
+                requestAnimationFrame(loop);
+            };
+            loop();
+            setTimeout(() => { running = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }, 6000);
+        }
+    </script>
+</body>
+
+</html>
