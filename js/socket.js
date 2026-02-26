@@ -5,7 +5,7 @@
 // ⚠️  Set this to your Render backend URL after deploying.
 //     e.g. 'https://ludo-king-xxxx.onrender.com'
 //     Leave empty string to connect to the same origin (local dev).
-const SOCKET_SERVER_URL = '';
+const SOCKET_SERVER_URL = 'https://ludo-king-zk38.onrender.com';
 
 // Socket.IO client is loaded via CDN script tag in index.html
 let _socket = null;
