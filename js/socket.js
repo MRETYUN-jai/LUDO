@@ -2,6 +2,11 @@
 // js/socket.js — Client Socket.IO wrapper
 // ============================================================
 
+// ⚠️  Set this to your Render backend URL after deploying.
+//     e.g. 'https://ludo-king-xxxx.onrender.com'
+//     Leave empty string to connect to the same origin (local dev).
+const SOCKET_SERVER_URL = '';
+
 // Socket.IO client is loaded via CDN script tag in index.html
 let _socket = null;
 let _token = null;
@@ -12,7 +17,7 @@ const _handlers = {};
 
 function initSocket() {
     if (_socket) return;
-    _socket = io(); // connects to same origin (server serves client)
+    _socket = io(SOCKET_SERVER_URL || undefined); // connects to Render URL, or same origin if empty
 
     // Route all events to registered handlers
     const events = [
