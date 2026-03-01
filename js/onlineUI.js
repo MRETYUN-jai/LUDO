@@ -13,9 +13,32 @@ function showScreen(id) {
 
 // ── Auth Screen ───────────────────────────────────────────
 function initAuth() {
-    SC.boot();
+    // ALWAYS show auth screen immediately — never leave page blank
+    showScreen('auth-screen');
 
-    const saved = localStorage.getItem('ludo_token');
+    const loginBtn = document.getElementById('auth-login-btn');
+    const registerBtn = document.getElementById('auth-register-btn');
+
+    // Disable buttons and show connecting status until socket is ready
+    loginBtn.disabled = true;
+    registerBtn.disabled = true;
+    setAuthError('⏳ Connecting to server…');
+
+    SC.on('_connected', () => {
+        // Socket is ready — enable buttons
+        loginBtn.disabled = false;
+        registerBtn.disabled = false;
+        setAuthError('');
+
+        // Auto-verify saved session
+        const saved = localStorage.getItem('ludo_token');
+        if (saved) SC.authVerify(saved);
+    });
+
+    SC.on('_connect_error', () => {
+        setAuthError('⚠️ Server is starting up, please wait…');
+    });
+
     SC.on('auth:result', handleAuthResult);
     SC.on('auth:expired', () => {
         localStorage.removeItem('ludo_token');
@@ -23,20 +46,16 @@ function initAuth() {
         setAuthError('Session expired. Please log in again.');
     });
 
-    if (saved) {
-        SC.authVerify(saved);
-    } else {
-        showScreen('auth-screen');
-    }
+    SC.boot();
 
-    document.getElementById('auth-login-btn').addEventListener('click', () => {
+    loginBtn.addEventListener('click', () => {
         const u = document.getElementById('auth-username').value.trim();
         const p = document.getElementById('auth-password').value;
         if (!u || !p) { setAuthError('Please fill in all fields'); return; }
         setAuthError('');
         SC.authLogin(u, p);
     });
-    document.getElementById('auth-register-btn').addEventListener('click', () => {
+    registerBtn.addEventListener('click', () => {
         const u = document.getElementById('auth-username').value.trim();
         const p = document.getElementById('auth-password').value;
         if (!u || !p) { setAuthError('Please fill in all fields'); return; }
@@ -44,7 +63,7 @@ function initAuth() {
         SC.authRegister(u, p);
     });
     document.getElementById('auth-password').addEventListener('keydown', e => {
-        if (e.key === 'Enter') document.getElementById('auth-login-btn').click();
+        if (e.key === 'Enter') loginBtn.click();
     });
 }
 
