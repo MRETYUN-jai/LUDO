@@ -17,9 +17,23 @@ const _handlers = {};
 
 function initSocket() {
     if (_socket) return;
-    _socket = io(SOCKET_SERVER_URL || undefined); // connects to Render URL, or same origin if empty
+    _socket = io(SOCKET_SERVER_URL || undefined, {
+        reconnectionAttempts: 10,
+        timeout: 30000,
+    });
 
-    // Route all events to registered handlers
+    // Connection lifecycle events
+    _socket.on('connect', () => {
+        if (_handlers['_connected']) _handlers['_connected']();
+    });
+    _socket.on('disconnect', () => {
+        if (_handlers['_disconnected']) _handlers['_disconnected']();
+    });
+    _socket.on('connect_error', (err) => {
+        if (_handlers['_connect_error']) _handlers['_connect_error'](err);
+    });
+
+    // Route all game events to registered handlers
     const events = [
         'auth:result', 'auth:expired',
         'room:created', 'room:joined', 'room:update', 'room:error',
