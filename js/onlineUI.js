@@ -6,58 +6,29 @@ const SC = window.SocketClient;
 
 // Show/hide screens
 function showScreen(id) {
-    ['connecting-screen', 'auth-screen', 'lobby-screen', 'room-screen', 'setup-screen', 'game-container', 'win-screen']
+    ['auth-screen', 'lobby-screen', 'room-screen', 'setup-screen', 'game-container', 'win-screen']
         .forEach(s => document.getElementById(s)?.classList.add('hidden'));
     document.getElementById(id)?.classList.remove('hidden');
 }
 
-// ── Connecting Screen (shown while Render server wakes up) ─
-function showConnecting(msg) {
-    const el = document.getElementById('connecting-msg');
-    if (el) el.textContent = msg || 'Connecting to server…';
-    showScreen('connecting-screen');
-}
-
 // ── Auth Screen ───────────────────────────────────────────
 function initAuth() {
-    // Show the connecting screen immediately — don't leave page blank
-    showConnecting('Connecting to server… (This may take up to 60s on first load)');
-
-    let connectErrorCount = 0;
-
-    SC.on('_connected', () => {
-        connectErrorCount = 0;
-        // Now that we're connected, proceed with auth
-        const saved = localStorage.getItem('ludo_token');
-        SC.on('auth:result', handleAuthResult);
-        SC.on('auth:expired', () => {
-            localStorage.removeItem('ludo_token');
-            showScreen('auth-screen');
-            setAuthError('Session expired. Please log in again.');
-        });
-        if (saved) {
-            SC.authVerify(saved);
-        } else {
-            showScreen('auth-screen');
-        }
-    });
-
-    SC.on('_connect_error', () => {
-        connectErrorCount++;
-        if (connectErrorCount === 1) {
-            showConnecting('Server is waking up, please wait… (Render free tier may take ~60s)');
-        } else if (connectErrorCount >= 5) {
-            // Show error with retry button
-            const el = document.getElementById('connecting-msg');
-            if (el) el.innerHTML =
-                'Could not connect to the game server.<br>' +
-                '<button onclick="location.reload()" class="btn-primary" style="margin-top:16px;">🔄 Retry</button>';
-        }
-    });
-
     SC.boot();
 
-    // Attach auth button listeners (always, regardless of connection state)
+    const saved = localStorage.getItem('ludo_token');
+    SC.on('auth:result', handleAuthResult);
+    SC.on('auth:expired', () => {
+        localStorage.removeItem('ludo_token');
+        showScreen('auth-screen');
+        setAuthError('Session expired. Please log in again.');
+    });
+
+    if (saved) {
+        SC.authVerify(saved);
+    } else {
+        showScreen('auth-screen');
+    }
+
     document.getElementById('auth-login-btn').addEventListener('click', () => {
         const u = document.getElementById('auth-username').value.trim();
         const p = document.getElementById('auth-password').value;
